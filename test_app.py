@@ -23,4 +23,3 @@ def test_status_endpoint():
     data = response.get_json()
     assert data["service"] == "projet-devops-groupe-demo"
     assert data["version"] == "1.0"
-    
