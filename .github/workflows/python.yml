@@ -39,8 +39,23 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
 
-      - name: Installer les dependances
-        run: pip install -r requirements.txt
+      - name: Cache pip
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: pip-${{ matrix.python-version }}-${{ hashFiles('requirements.txt') }}
+          restore-keys: |
+            pip-${{ matrix.python-version }}-
 
-      - name: Lancer les tests
-        run: pytest -v
+      - name: Installer les dependances
+        run: pip install -r requirements.txt pytest-cov
+
+      - name: Lancer les tests avec couverture
+        run: pytest -v --cov=. --cov-report=html
+
+      - name: Sauvegarder le rapport de couverture
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: coverage-report-${{ matrix.python-version }}
+          path: htmlcov/
