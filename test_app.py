@@ -1,4 +1,4 @@
-from app import alert_threshold, sanitize_input, app
+﻿from app import alert_threshold, sanitize_input, app
 
 
 def test_alert_threshold():
