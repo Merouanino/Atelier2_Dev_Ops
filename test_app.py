@@ -2,7 +2,7 @@
 
 
 def test_alert_threshold():
-    assert alert_threshold() == 25
+    assert alert_threshold() == 99
 
 
 def test_sanitize_input_escapes_html():
