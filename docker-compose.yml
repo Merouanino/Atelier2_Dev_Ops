@@ -1,0 +1,22 @@
+services:
+  web:
+    build: .
+    ports:
+      - "5000:5000"
+    networks:
+      - appnet
+    depends_on:
+      - redis
+
+  redis:
+    image: redis:7-alpine
+    networks:
+      - appnet
+    volumes:
+      - redis-data:/data
+
+networks:
+  appnet:
+
+volumes:
+  redis-data:
