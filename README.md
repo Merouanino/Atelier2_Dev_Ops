@@ -7,3 +7,6 @@
 Le pipeline se déclenche à chaque push sur `main` et à chaque pull request.
 
 Un job lint flake8 et un job test sur py 3.10, 3.11 et 3.12 avec dependenices pip cached et rapport HTML. 
+
+Mesure Gains:
+Disk usage qui est passé de 1GB à 197MB 
