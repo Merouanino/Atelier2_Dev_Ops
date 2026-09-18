@@ -6,7 +6,8 @@ services:
     networks:
       - appnet
     depends_on:
-      - redis
+      redis:
+        condition: service_healthy
 
   redis:
     image: redis:7-alpine
@@ -14,6 +15,12 @@ services:
       - appnet
     volumes:
       - redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+      start_period: 5s
 
 networks:
   appnet:
