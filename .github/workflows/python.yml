@@ -82,3 +82,17 @@ jobs:
           tags: |
             merouano/starter-app:latest
             merouano/starter-app:${{ github.sha }}
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build-and-push
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    environment: Prod
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Déployer l'image
+        run: |
+          echo "Image : merouano/starter-app:${{ github.sha }}"
+          echo "Script deploy/deploy.sh exécuté sur le serveur cible"
+          echo "Couleur inactive déterminée depuis deploy/active_color"
