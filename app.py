@@ -8,7 +8,11 @@ ALERT_THRESHOLD = 25
 
 
 def get_redis_client():
-    return redis.Redis(host=os.getenv("REDIS_HOST", "redis"), port=6379)
+    return redis.Redis(
+        host=os.getenv("REDIS_HOST", "redis"),
+        port=6379,
+        socket_timeout=1
+    )
 
 
 def alert_threshold():
@@ -23,7 +27,11 @@ def sanitize_input(value):
 
 @app.route("/health")
 def health():
-    return jsonify(status="ok"), 200
+    try:
+        get_redis_client().ping()
+        return jsonify(status="ok"), 200
+    except Exception:
+        return jsonify(status="redis unavailable"), 503
 
 
 @app.route("/status")
