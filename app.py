@@ -38,8 +38,9 @@ def health():
 def status():
     return jsonify(
         service="projet-devops-groupe-demo",
-        version="1.1",
-        color=os.getenv("APP_COLOR", "unknown")
+        version="1.0",
+        color=os.getenv("APP_COLOR", "unknown"),
+        commit_sha=os.getenv("COMMIT_SHA", "unknown")
     ), 200
 
 

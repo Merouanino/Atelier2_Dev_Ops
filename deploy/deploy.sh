@@ -58,6 +58,28 @@ if [ "$OK" -ne 1 ]; then
     exit 1
 fi
 
+if [ -n "$EXPECTED_SHA" ]; then
+    DEPLOYED_SHA=$(docker compose exec -T "app-$NEW" \
+        python3 -c "
+import urllib.request, json, sys
+try:
+    r = urllib.request.urlopen('http://localhost:5000/status', timeout=2)
+    data = json.loads(r.read())
+    print(data.get('commit_sha', ''))
+except Exception:
+    sys.exit(1)
+" 2>/dev/null)
+
+    if [ "$DEPLOYED_SHA" != "$EXPECTED_SHA" ]; then
+        echo "ÉCHEC SHA : attendu $EXPECTED_SHA, déployé $DEPLOYED_SHA"
+        docker stop "starter-app2-app-$NEW-1" || true
+        docker rm "starter-app2-app-$NEW-1" || true
+        echo "Couleur active inchangée : $ACTIVE"
+        exit 1
+    fi
+    echo "SHA vérifié : $DEPLOYED_SHA"
+fi
+
 cat > "$NGINX_CONF" << NGINX
 server {
     listen 80;
