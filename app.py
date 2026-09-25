@@ -1,7 +1,8 @@
 ﻿from flask import Flask, jsonify, request
 import redis
 import os
-from prometheus_client import Counter, generate_latest, CONTENT_TYPE_LATEST
+import time
+from prometheus_client import Counter, Histogram, generate_latest, CONTENT_TYPE_LATEST
 
 app = Flask(__name__)
 ALERT_THRESHOLD = 25
@@ -10,6 +11,12 @@ http_requests_total = Counter(
     'http_requests_total',
     'Total des requêtes HTTP',
     ['method', 'endpoint', 'status']
+)
+
+http_request_duration_seconds = Histogram(
+    'http_request_duration_seconds',
+    'Durée de traitement des requêtes HTTP',
+    ['method', 'endpoint']
 )
 
 def get_redis_client():
@@ -25,6 +32,10 @@ def alert_threshold():
 def sanitize_input(value):
     return value.replace("<", "&lt;").replace(">", "&gt;")
 
+@app.before_request
+def start_timer():
+    request._start_time = time.time()
+
 @app.after_request
 def record_metrics(response):
     if request.path != '/metrics':
@@ -33,6 +44,11 @@ def record_metrics(response):
             endpoint=request.path,
             status=response.status_code
         ).inc()
+        duration = time.time() - getattr(request, '_start_time', time.time())
+        http_request_duration_seconds.labels(
+            method=request.method,
+            endpoint=request.path
+        ).observe(duration)
     return response
 
 @app.route("/metrics")
@@ -61,6 +77,10 @@ def visits():
     r = get_redis_client()
     count = r.incr("visits")
     return jsonify(visits=count), 200
+
+@app.route("/simulate-error")
+def simulate_error():
+    return jsonify(error="simulated error"), 500
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", debug=True)
