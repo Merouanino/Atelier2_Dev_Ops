@@ -19,6 +19,7 @@ http_request_duration_seconds = Histogram(
     ['method', 'endpoint']
 )
 
+
 def get_redis_client():
     return redis.Redis(
         host=os.getenv("REDIS_HOST", "redis"),
@@ -26,15 +27,19 @@ def get_redis_client():
         socket_timeout=1
     )
 
+
 def alert_threshold():
     return ALERT_THRESHOLD
+
 
 def sanitize_input(value):
     return value.replace("<", "&lt;").replace(">", "&gt;")
 
+
 @app.before_request
 def start_timer():
     request._start_time = time.time()
+
 
 @app.after_request
 def record_metrics(response):
@@ -51,9 +56,11 @@ def record_metrics(response):
         ).observe(duration)
     return response
 
+
 @app.route("/metrics")
 def metrics():
     return generate_latest(), 200, {'Content-Type': CONTENT_TYPE_LATEST}
+
 
 @app.route("/health")
 def health():
@@ -62,6 +69,7 @@ def health():
         return jsonify(status="ok"), 200
     except Exception:
         return jsonify(status="redis unavailable"), 503
+
 
 @app.route("/status")
 def status():
@@ -72,15 +80,18 @@ def status():
         commit_sha=os.getenv("COMMIT_SHA", "unknown")
     ), 200
 
+
 @app.route("/visits")
 def visits():
     r = get_redis_client()
     count = r.incr("visits")
     return jsonify(visits=count), 200
 
+
 @app.route("/simulate-error")
 def simulate_error():
     return jsonify(error="simulated error"), 500
+
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", debug=True)
