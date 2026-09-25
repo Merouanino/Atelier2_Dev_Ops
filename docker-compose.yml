@@ -18,6 +18,7 @@ services:
     environment:
       - REDIS_HOST=redis
       - APP_COLOR=blue
+      - COMMIT_SHA=${COMMIT_SHA:-local}
     networks:
       - appnet
     depends_on:
@@ -30,6 +31,7 @@ services:
     environment:
       - REDIS_HOST=redis
       - APP_COLOR=green
+      - COMMIT_SHA=${COMMIT_SHA:-local}
     networks:
       - appnet
     depends_on:
@@ -46,6 +48,18 @@ services:
       - appnet
     depends_on:
       - redis
+  
+  prometheus:
+    image: prom/prometheus:latest
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./prometheus/alerts.yml:/etc/prometheus/alerts.yml:ro
+    networks:
+      - appnet
+    depends_on:
+      - nginx
 
 networks:
   appnet:

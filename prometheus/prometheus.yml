@@ -1,0 +1,10 @@
+global:
+  scrape_interval: 15s
+
+rule_files:
+  - "alerts.yml"
+
+scrape_configs:
+  - job_name: "starter-app"
+    static_configs:
+      - targets: ["app-blue:5000", "app-green:5000"]
