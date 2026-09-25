@@ -61,8 +61,23 @@ services:
     depends_on:
       - nginx
 
+  grafana:
+    image: grafana/grafana:latest
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD:-admin}
+    volumes:
+      - ./grafana/provisioning:/etc/grafana/provisioning:ro
+      - grafana-data:/var/lib/grafana
+    networks:
+      - appnet
+    depends_on:
+      - prometheus
+
 networks:
   appnet:
 
 volumes:
   redis-data:
+  grafana-data:
